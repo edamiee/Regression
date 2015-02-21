@@ -2,13 +2,108 @@
 title: "Motor Trend Analysis"
 author: "Damien Edwards"
 date: "February 20, 2015"
-output: html_document
+output: pdf_document
 ---
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+##Is an automatic or manual transmission better for gas mileage(MPG)?
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+####Executive Summary
+This report for Motor Trend will use data collected to determine the relationship between a set of variables and miles per gallon(MPG)outcome. We will need to determine is an automatic or manual transmission better for MPG. Also, we will need to quantify the MPG difference between automatic and manual transmissions.
 
-```{r}
-summary(cars)
+#### Data Preparation
+
+The mtcars data set is used for the the data analysis
+
+
+```{r, echo=TRUE,eval=FALSE}
+library(datasets)
+head(mtcars)
 ```
+
+##Model
+
+Do a multivariable reqgression on the mtcars dataset
+```{r, eval=FALSE}
+summary(lm(mpg ~ ., data = mtcars))$coefficients
+```
+The backward-elimination strategy is used to eliminate the unrelated variables one-at-a-time. Remove cyl from the data set because of the high p-value and refit the model. (See Appendix)
+
+The variables used are wt,qsec,am in the final model. Those variables are used to predict the miles per gallon of a vehichle.
+```{r,echo=TRUE}
+d1 <- mtcars[, c("mpg", "wt", "qsec", "am")]
+fit <- lm(mpg ~ . - 1, data = d1)
+summary(fit)$coefficients
+```
+
+##Exploratory Analysis
+
+```{r,echo=TRUE}
+par(mfrow = c(2, 2))
+plot(fit)
+
+```
+
+##Statistical Inference
+Using a t-test.(p-value = 0.001374) The null Hypothesis that the transmission doesn't have an effect on the MPG is thrown out if the p=value is greater than .05,
+
+```{r,echo=TRUE,eval=FALSE}
+t.test(mpg ~ am, data = mtcars)
+```
+
+```{r,echo=TRUE}
+Coef <- summary(fit)$coefficients
+Coef_intv <- Coef["am", 1] + c(-1, 1) * qt(0.975, df = fit$df) * Coef["am", 
+    2]
+Coef_intv
+```
+
+##Conclusion
+The transmision of a car has a significicant effect on miles per gallon.The change from automatic to manual transmissions results in 2.2 to 6.39 increase in mpg for cars with 95% confidence. The manaul transmission is better for mpg. 
+
+##Appendix
+```{r,echo=TRUE}
+pairs(d1, panel = panel.smooth, main = "mtcars dataset")
+```
+
+```{r,echo=TRUE}
+d1 <- mtcars
+d1 <- d1[, names(d1) != "cyl"]
+summary(lm(mpg ~ ., data = d1))$coefficients
+```
+
+```{r,echo=TRUE}
+d1 <- d1[, names(d1) != "vs"]
+summary(lm(mpg ~ ., data = d1))$coefficients
+```
+
+```{r,echo=TRUE}
+d1 <- d1[, names(d1) != "carb"]
+summary(lm(mpg ~ ., data = d1))$coefficients
+```
+
+```{r,echo=TRUE}
+d1 <- d1[, names(d1) != "gear"]
+summary(lm(mpg ~ ., data = d1))$coefficients
+```
+
+```{r,echo=TRUE}
+d1 <- d1[, names(d1) != "drat"]
+summary(lm(mpg ~ ., data = d1))$coefficients
+```
+
+```{r,echo=TRUE}
+d1 <- d1[, names(d1) != "disp"]
+summary(lm(mpg ~ ., data = d1))$coefficients
+```
+```{r,echo=TRUE}
+d1 <- d1[, names(d1) != "hp"]
+summary(lm(mpg ~ ., data = d1))$coefficients
+```
+The p-values are smaller for the remaining variables so we can stop removing variables..
+
+
+
+
+
+
+
